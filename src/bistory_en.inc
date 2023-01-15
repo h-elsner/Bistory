@@ -8,10 +8,42 @@ capCategory='Category';
 hntCatrgory='Category of the command.;
 capCommand='Command';
 hntCommand='Command to be executed.';
-capCommands='Terminal Kommandos';
+capCommands='Terminal commands';
 capInfo='Description / Hint';
 hntInfo='Short description of the command';
-capTerminal='Terminal';
-hntTerminal='Show terminal window during execution? Usually true.';
 
+capClose='&Quit';
+hntClose='Close application.';
+capLoadHist='&History';
+hntLoadHist='Read bash history.';
+capNew='&New';
+hntNew='Create new command.';
+capAdd='&Add';
+hntAdd='Add new command to the list.';
+capExecute='&Execute';
+hntExecute='Execute this command.';
+capAbout='About Bistory';
+capManual='Manual';
+hntManual='Help text about application.';
+capGit='Bistory homepage';
+hntGit='Information about Bistory and souces in GitHub.';
+capHilfe='Help';
+capDatei='File';
+capTools='Tools';
+capCopy='Copy';
+hntCopy='Copy command to clipboard';
+capEdit='Edit';
+hntEdit='Save edited entry.';
+capDelete='Delete';
+hntDelete='Delete selected command.';
+defaultcommand='System#sudo apt update && sudo apt upgrade -y#Get latest updates';
+
+errNoData='No data in ';
+errNoCmd='No command entered';
+errCmdFailed='Command failed';
+
+sAdded=' added';
+sExecuted=' executed';
+sEdited=' edited';
+sDeleted=' deleted';
 

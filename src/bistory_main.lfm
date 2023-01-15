@@ -1,14 +1,17 @@
 object Form1: TForm1
-  Left = 1691
-  Height = 447
-  Top = 205
-  Width = 765
+  Left = 1695
+  Height = 440
+  Top = 191
+  Width = 717
   Caption = 'Form1'
-  ClientHeight = 447
-  ClientWidth = 765
+  ClientHeight = 416
+  ClientWidth = 717
   Constraints.MinHeight = 440
   Constraints.MinWidth = 640
+  Menu = MainMenu1
+  OnActivate = FormActivate
   OnCreate = FormCreate
+  OnDblClick = FormDblClick
   OnResize = FormResize
   Position = poDefaultPosOnly
   ShowHint = True
@@ -16,28 +19,30 @@ object Form1: TForm1
   object btnReadHist: TBitBtn
     Left = 408
     Height = 40
-    Top = 374
-    Width = 120
+    Top = 348
+    Width = 128
+    Action = actLoadHist
     Anchors = [akLeft, akBottom]
-    Caption = 'btnReadHist'
-    OnClick = btnReadHistClick
+    Images = ImageList1
+    ImageIndex = 4
     TabOrder = 1
   end
   object btnClose: TBitBtn
-    Left = 610
+    Left = 557
     Height = 40
-    Top = 374
-    Width = 120
+    Top = 348
+    Width = 128
+    Action = actClose
     Anchors = [akRight, akBottom]
-    Caption = 'btnClose'
-    OnClick = btnCloseClick
+    Images = ImageList1
+    ImageIndex = 0
     TabOrder = 2
   end
   object StatusBar: TStatusBar
     Left = 0
     Height = 17
-    Top = 430
-    Width = 765
+    Top = 399
+    Width = 717
     Panels = <    
       item
         Width = 50
@@ -47,32 +52,28 @@ object Form1: TForm1
       end>
     SimplePanel = False
   end
-  object tvCommand: TTreeView
-    Left = 24
-    Height = 398
-    Top = 16
-    Width = 348
-    TabStop = False
-    Anchors = [akTop, akLeft, akBottom]
-    TabOrder = 4
-  end
   object gbCommand: TGroupBox
     Left = 388
-    Height = 348
+    Height = 324
     Top = 16
-    Width = 348
+    Width = 312
     Anchors = [akTop, akLeft, akRight, akBottom]
     Caption = 'gbCommand'
-    ClientHeight = 331
-    ClientWidth = 346
+    ClientHeight = 307
+    ClientWidth = 310
     TabOrder = 0
     object cbCategory: TComboBox
       Left = 16
       Height = 27
-      Top = 40
-      Width = 316
+      Top = 32
+      Width = 280
       Anchors = [akTop, akLeft, akRight]
       ItemHeight = 0
+      Items.Strings = (
+        'System'
+        'Info'
+        'Tools'
+      )
       TabOrder = 0
       Text = 'cbCategory'
     end
@@ -86,15 +87,15 @@ object Form1: TForm1
     object lblCommand: TLabel
       Left = 16
       Height = 16
-      Top = 92
+      Top = 76
       Width = 77
       Caption = 'lblCommand'
     end
     object edInfo: TMemo
       Left = 16
-      Height = 48
-      Top = 180
-      Width = 316
+      Height = 33
+      Top = 160
+      Width = 280
       Anchors = [akTop, akLeft, akRight, akBottom]
       Lines.Strings = (
         'edInfo'
@@ -104,35 +105,26 @@ object Form1: TForm1
     object lblInfo: TLabel
       Left = 16
       Height = 16
-      Top = 157
+      Top = 140
       Width = 41
       Caption = 'lblInfo'
     end
-    object cbxTerminal: TCheckBox
-      Left = 16
-      Height = 23
-      Top = 244
-      Width = 99
-      Anchors = [akLeft, akBottom]
-      Caption = 'cbxTerminal'
-      Checked = True
-      State = cbChecked
-      TabOrder = 3
-    end
     object btnExecute: TBitBtn
-      Left = 240
+      Left = 204
       Height = 40
-      Top = 280
+      Top = 256
       Width = 92
+      Action = actExecute
       Anchors = [akRight, akBottom]
-      Caption = 'btnExecute'
-      TabOrder = 4
+      Images = ImageList1
+      ImageIndex = 2
+      TabOrder = 3
     end
     object edCommand: TEdit
       Left = 16
       Height = 27
-      Top = 116
-      Width = 316
+      Top = 96
+      Width = 280
       Anchors = [akTop, akLeft, akRight]
       TabOrder = 1
       Text = 'edCommand'
@@ -140,24 +132,225 @@ object Form1: TForm1
     object btnNew: TBitBtn
       Left = 16
       Height = 40
-      Top = 281
+      Top = 208
       Width = 75
-      Caption = 'btnNew'
-      OnClick = btnNewClick
-      TabOrder = 5
+      Action = actNew
+      Anchors = [akLeft, akBottom]
+      Images = ImageList1
+      ImageIndex = 7
+      TabOrder = 4
     end
     object btnAdd: TBitBtn
-      Left = 128
+      Left = 16
       Height = 40
-      Top = 281
+      Top = 256
       Width = 75
-      Caption = 'btnAdd'
+      Action = actAdd
+      Anchors = [akLeft, akBottom]
+      Images = ImageList1
+      ImageIndex = 1
+      TabOrder = 5
+    end
+    object btnEdit: TBitBtn
+      Left = 108
+      Height = 40
+      Top = 208
+      Width = 75
+      Action = actEdit
+      Anchors = [akLeft, akBottom]
+      Images = ImageList1
+      ImageIndex = 10
       TabOrder = 6
+    end
+    object btnDelete: TBitBtn
+      Left = 108
+      Height = 40
+      Top = 256
+      Width = 75
+      Action = actDelete
+      Anchors = [akLeft, akBottom]
+      Images = ImageList1
+      ImageIndex = 9
+      TabOrder = 7
+    end
+    object btnCopy: TBitBtn
+      Left = 204
+      Height = 40
+      Top = 208
+      Width = 75
+      Action = actCopy
+      Anchors = [akLeft, akBottom]
+      Images = ImageList1
+      ImageIndex = 8
+      TabOrder = 8
+    end
+  end
+  object pcHist: TPageControl
+    Left = 16
+    Height = 376
+    Top = 16
+    Width = 356
+    ActivePage = tsTree
+    Anchors = [akTop, akLeft, akBottom]
+    Images = ImageList1
+    TabIndex = 0
+    TabOrder = 4
+    Options = [nboKeyboardTabSwitch]
+    object tsTree: TTabSheet
+      Caption = 'tsTree'
+      ClientHeight = 346
+      ClientWidth = 346
+      object tvCommand: TTreeView
+        Left = 0
+        Height = 346
+        Top = 0
+        Width = 346
+        TabStop = False
+        Align = alClient
+        TabOrder = 0
+      end
+    end
+    object tsHist: TTabSheet
+      Caption = 'tsHist'
+      ClientHeight = 346
+      ClientWidth = 346
+      object gridHist: TStringGrid
+        Left = 0
+        Height = 346
+        Top = 0
+        Width = 346
+        Align = alClient
+        ColCount = 1
+        FixedCols = 0
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goEditing, goSmoothScroll, goSelectionActive]
+        TabOrder = 0
+        OnBeforeSelection = gridHistBeforeSelection
+        ColWidths = (
+          545
+        )
+      end
     end
   end
   object ImageList1: TImageList
     Left = 240
     Top = 72
+    Bitmap = {
+      4C7A0B0000001000000010000000480E00000000000078DAD5990B5894551AC7
+      67F7797A326B9FDA7273D342D25DD3B59004152F04A186172CF14A5E00033141
+      4323514005244225E4A26683CA841808E20551890C419492BB1714CB0B912628
+      83030CC30073F9EF391F73868F616618D8B6DDBEE7F9331FE79CDFFBBEE73DEF
+      77BE3390979727C8234A4DBD64161F5F6A95985834224FD3C617ED373393550E
+      1FFEB0445FFFECD9954281E001060E2CAF8E8B8BB3E5F7519B1616D5F91DFD27
+      AAB76DDBE675E6CC99115DF93CC2E7422038015BDBAD95191919B6CC6F075B04
+      DAFFECB34E58BE7C39A2A3A3F3B3B3B3CD3AF9BB4236C6CA2A192929295EB49D
+      C64CFD76D89E86975E7A092121219C323333AD18EFE95915F8E49315B28E715B
+      490C3E1830A08EDCD772310904B6E4F7011C171E1E5E979E9EEEAC9B036A4320
+      A8D0F8BA814EBF7E20C9C3BA75EB3836353575A9BE1C520904520DC37498B04E
+      F0F1F1E17CEBF36B9C17927C5869E76C8863EBDB315F3E9F48F899206B56ADBB
+      665DD7EF01C97F9D0EDB2133B358909AF032C4C6C595DB9A99DD25BE2F6A9858
+      8D3A63B0B048CC9F3DDB53A8CBD2DA1A38B0B55A20F8513B76E4487BA2B360F5
+      D0A9E198366D5A129FA735DFB94E8978E28927E0E0E0C0E5CAC6E67665878DCE
+      F5DFB1634725BFEEBAF2C3B52CABCF8EF530BCFE19190503FCFCCABD2C2C02F3
+      6D6D676B59966B3FBF0A2F4FCFB8A49ED69FC4250C0A0AE2C6C4C7C777C9137D
+      1668BBBEBA03F087D2BB0717C5CE3C3037B82FECECC485B11E996BE0767C15DE
+      8E9D11D01BD6E9AB05B11F9C5C8DAD57A21178291C8B92DD61F3A95D9029EC2C
+      D1FC58F713DE082D8F427079245C52966342B83DACB74CECC7C6B89DF59EB234
+      6BE58A6E6CC2BC581A6F70D90E6C29DBCEF91DBFD55669B5794227FBADF7E4A5
+      67BC1EACC90BC08274375FD64EF214EB7AEC436C2EDD8E4DA51158F8B51BC685
+      4E568ED964A3655DB357BDB3E4B4D7FD80C2CF10521605E7E4C54A9227DF19FB
+      9D23971E5D894D259F21A0381CF30F2DC3D89049CA3783C6F7E3C7B7F8D48AA7
+      DE3FE1019F1C7F7C7A35068185E1703FE90D8F536BB0B1300C1B8BB7625ED252
+      58074F54BD1938AE9FBEFCCC4B5DDA9FF885C7E935DC1C834A22E05F140AFFC2
+      50CC3DB898E6496D1930B69FD11C27CCEB3F23DE194BD23DB1A1682B3EB9B405
+      CE5FBD0F9227F5E88DC6592687B819FDED773A623E89F73DD122903CA92D3658
+      F7EB4D9D9075ED3F3ECC16244F0A0B7FAB27FB52A7244FFDDF583FE6C9DFEB99
+      2217F9E1C693396D8469AC1D6F7FE5DB0836C9061B1B1C1CDC656C6E6EAE893C
+      8D55043A5EB7CF741B826EFE7B6BC3CECECEE0186ABB271BC6FA690CD4BE311F
+      CC0F3F1E6A93E585F651F514A7AE1DBE0D1683211B6C0EBAB964E3591E586CFA
+      78EA4B9767ED2C0F3DADA3BEB5E4F775D4BB00869F054137FF313131F0F5F585
+      A5A525E6CC99037B7B7B98FA7C51C6DDDD9D13BD676731536B93BCA7BB88FA36
+      3737476F7DF363E0D9D75E438698DB12C5109913D1DFFF42F4B4E67E365102D1
+      9F05062ED2174004A266A23ACD3D9598773FD008EFC71B6748AF1960FF4C546D
+      029F66801F4AFB478E1A0D2FBF1D5813B41B9E6B23B0E2E36DF868D317705F1D
+      8A61C38653FE8101FE55CA87C41EC3A56B12645DAA47465133A79C5209CE978A
+      B1CA3F8AF2353ADCF31ABD48D4243C7605A2C3151026DFD4F2C2E44A24A45420
+      6C7706E54B788CAE3EF50988C685EBCD387BB919C939621CB9D0C0DD5FB82E83
+      EBAA20CA7FC46778718C9CF6F6B8BFBD3A7498CF624FFF1BFEE109EAA0C8346C
+      8E4A47C0B624B5EBAA4D375E7D759837AD057DD7C1DD1F594FB2B13CECE331FB
+      193A66D0A0C117070F7E19E4939E9B4F094CB8860E1D6A6D336E74B9A5C5C802
+      62E38E46F7887E35E457CF3A3C636636C4827CE612DDD2D82835856FF8693FD5
+      D49FBE8F8E77729C249D30CEB27DFC588B7687B7C6B63CBEB94F48FA6611FDC9
+      081F4E8434E15AECDDE6892976633179C29B880975C7E9A40DA07D445F18E13D
+      89DA2437BE44F1613FE47FED87EF44BEB87AD41F929BF19455127DDCC31C0649
+      2A852B1F5E08DF539B1B7A8428BDF67CD85ED2EE4D34A41B40F6123B9108C174
+      7FADAAEA714FA163E858CA5096ED27DC7BC1CD8D6BB3237B2CDF16BDA76D5C1F
+      1943C7EAEE4BFC3D9BDBE735B618C37FBFD3B1BA7B1ADBDBD9FB837ED2BD92F6
+      55D198797D8678DDB9D23D9FF6E99E2D7AF2CFC631FF6C4EFC188CF967B6CACB
+      CBB57DBD993F1B47E7CDFCF373DB937F364644D698AE133F6FA6F0C6FCF7143F
+      DF07CB9FEEDA993A7F963F5DDF7C9ED5A1A1F9F3FDF3CF528C6535CAEA94D9A7
+      7367F1D338B4E72F5E5D0B346708E6AF4B1F79BF339EDEEBFAD077DEED726EA0
+      1CB3A5670D4CFF5E20E8136B4ECEE5F6C1B91091B3B9BDB9E9E715267B813D72
+      ED3A7EA3F7F4BCD45BFFD43715BDEF2DCFE64E4563EF4DFC1C437CBA0BDCB91C
+      D0F8DD7BB106743CE58283FB367FE6BBAF3C8BE18FCAD3FCF3E74FEF7B9B7FB7
+      E02A6D4B95A08A8BC1D41AE06A9FAE214FBDAD41F61D4157BFE7DFDA68CC547D
+      6543EC49CC82106EFEBDD947F82C5FA6D8D165EDDD44DCB3E46EDEB31D5DD63C
+      B78ABEC4E806CD0D70B7137589879F1B5D96FA3317E56AEFE9201A87B69FD424
+      8BC1E07C49EC9C7F3288D962ECDAB56BC1F6197D2CF36F1E2CEA3277C6D2770B
+      E5B9FAB4EFA8513E4FFD52FFBA7619CBE7E9FBEDF8F1E35DEC50D6905FAA3996
+      73C09E932ACD5951229174B3638C65CFAABBB93B44649E86EC1862BBEDD77AEC
+      B073A421D6143BA6B0C6ECF486D567A7AFCFB0294A5DE7EC732723AAF9764A10
+      6E2707E2A74381B8793000D7BFF24745C27A5C3DE087F2F88F5146BE13157FE1
+      8BC2DDAB71313EB0997294BF931EAEAACD8E436F753EC6574579CE6F1F9417E9
+      C5E5E4168957DF45C718BB72223C38FEC7A4808E86DC0F91939383ACACAC2EBC
+      5C5A8F16C923C8EA6A207D741F4D3577B9F66FC33BDE473457C6FC2B5A1AD1DA
+      FC18F2A63AC81B1EA1455CCBB56785BA723CCD33F34F6B3E2D2DAD2BDFDA0C85
+      5C0A85AC09ED52095A9BC45CFBE92D4B399EAE9151FF6D722299C64E1367875E
+      27372DE6F82BFBFD3A808489DC7959281476E155AA5628146D50B4133BED2D9C
+      1D7A9D0874E1F892BDBE46FDAB54ED5A2995C486A2856B4F5F3F9FE38B767FD4
+      01EC1C853D7BF6202222A20BAF562B356AE7A454B671ED697EF338FE52DCEA3E
+      AD7FEAC7CED0D47FEA859D1F72F5748E7CE73F1BBE1CD9616E3845F24B739411
+      E48263018B70D47F218E909853895FC250A5FE3FFC3FADEC9B34E893C0C48B8E
+      D5BD68DB2AC737F19FF0D2BA0726D9607C556A1827BE7FA6DEF857B4CAD1D228
+      41E3A31AD4DFAF329967FEF9FA393552AFF4F1BA7E1FDEBDC98DE5DE613CD592
+      B602EFCE9828DF26931AF4AFCBD3369ADB23F34780F1CD8FEB20A9B987BAEADB
+      A8B9751DBFDEBC82EAAB455AFE5AD8224E8CA72C13E5F9ECBDEBA5A82AFF1EB7
+      0A73F5FAD715E50317BFA357BAFEF962BCB1B531C5BF29FCFFDAFF7F93FFEDFF
+      9708313DD6764AC597B807B66EF82860E92A60C987C0E2956AB8AC5063A1871A
+      F397AB31F4352519A46832C62EF306A63802D6D66A8C19A386A5A50A6FBCA182
+      CD6425DE5BA6C4907FB693C1F23A43ACCB1290F32C3077AE1AA347ABF0FAEB2A
+      CC9AA54449891AD39D1498B148815786B5114856C7E3B978A738AA39562A05EA
+      EB0127272566CE54424C66DD44A22E2A52E35FA3DBE1E04C639082CFD3B95A59
+      A931678E8A63990D2ACA8AC56ABCF5563B060E6C85DDBBD47F238F57619167E7
+      5C69BC8CEB60015BDB36BCF8622B5E78418EC9B35ABBF10B3E5073731D395289
+      E9D3757935264E6CC3F3CFCBF1ECB32DB099DE9D9FEBA6C288114A383A76CE97
+      7E52B6910C7DF4484DD6448EA79F9661EC34CA4B78BC82AC8D0A63C62B505CAC
+      E6D8BA3A35264D6AC38409AD1CDBD8A84641810A7F7FA5055653E43A7C9B98AE
+      EB4C17051C1C15282C54712C9DEB73CF91F156728EB51C2B87F55439060C6E22
+      507D6DD71A908BE9BA4E9DD78E7F8CEC9CEB33CFC8F0D45332BC3858C6F91D30
+      B8B11BDB6943261E642EC364A7364C9CD10A1BC7566EAED6841BE3609CEDB4D1
+      28A6B9ED9444A37AAAFADFFCFD9F9918559E21AA2D3DB2A7A13465677725EB28
+      6D5743E9F17DD1DABFB19E143D148BEBD4CDCD52C865CDC62515A349F2106547
+      F74A184FFD364B9B70EFD41E5C3E1585D4D321D85592884FAFA461EBE56444E6
+      EF467CC22A5C20DF236E1CD8C09D83CB8FEC6ED0F229D10DD4F6BDD37BF14D56
+      04761527E293AB87B1B2781F3C2EED8577E197083B1B89AF85DEA814059233F4
+      433D7C13EE670991742684F84CC10AC22CFB3E16EFE747C2E57C04D6E5EFC4E7
+      716EF8F1E066B434D4A2AC1BDF805FBFD987C4CC606C2EFD0AAE053158981781
+      B9E74231F7BB2D589D1381ED31AE483A2C82CBD737119E710BEF1CB88C517BAE
+      B8727CB3040FB20FE04C6604B6E5EF82474134E69D0BC17BDF06C22527181B4F
+      6CC2FA837BB0E15C0D4E5D25BEC8DE907E5582E99FFF50CBF1D2C7A8392BC295
+      33BB204ADB08DF93115891B303CBCF46C0E748105627EC4448451D4EDE6B4364
+      5E0D8E5D6BC1C59F95F0125D93D3359637D5A3362791B37139330EAE5BFD3175
+      E767783B3202D3E3F66373453D2EB6A8B0FA4E0BD614D5C323A912CBF65D153B
+      C7150DE7F84631DE4D0B84D3E10D9899FC09C606C563BEE81AA61DAA40C0B5C7
+      F841AE82DB6D1996FC2247E08D2638EDFB513D35AAD4923BFF274711BE1EB9B7
+      F3B53A7EAD00BE1917B0A1B886635D09BBB85A8EA08A46CC12DEC1D14307A52C
+      FF25A4265B74F8EDB9E7B03EFB06F249CC1E55722CFBA595C4D100C72F7F4255
+      F57D94911AEEACBF2FAA1B25F5A436E9F7AC46249D2B47E099EB88C9BA820585
+      F7B1A44A868D97EBE1BCFF36EEFE4AEB97D41FAF7ECB8EEFDF517E2CFE02AD09
+      6A77CAF634FC4CF6AFF9F1373128F01C667C590087CF7254998712A4B49FD47E
+      0361620C3D8FA356842976FFD086D8C236BC1D5E88973DD3A41601D9A34D7D9E
+      FF6ABB403EC22D4231635B8EC221EABBF36F6CC81C6A6CFCBF01BC44E126
+    }
   end
   object ActionList: TActionList
     Images = ImageList1
@@ -165,24 +358,111 @@ object Form1: TForm1
     Top = 68
     object actClose: TAction
       Caption = 'actClose'
+      ImageIndex = 0
+      OnExecute = actCloseExecute
     end
     object actLoadHist: TAction
       Caption = 'actLoadHist'
-    end
-    object actSaveBistory: TAction
-      Caption = 'actSaveBistory'
+      ImageIndex = 4
+      OnExecute = actLoadHistExecute
     end
     object actNew: TAction
       Caption = 'actNew'
+      ImageIndex = 7
+      OnExecute = actNewExecute
     end
     object actAdd: TAction
       Caption = 'actAdd'
+      ImageIndex = 1
+      OnExecute = actAddExecute
     end
     object actExecute: TAction
       Caption = 'actExecute'
+      ImageIndex = 2
+      OnExecute = actExecuteExecute
     end
-    object actCategory: TAction
-      Caption = 'actCategory'
+    object actAbout: TAction
+      Caption = 'actAbout'
+      ImageIndex = 5
+      OnExecute = actAboutExecute
+    end
+    object actManual: TAction
+      Caption = 'actManual'
+      ImageIndex = 6
+      OnExecute = actManualExecute
+    end
+    object actCopy: TAction
+      Caption = 'actCopy'
+      ImageIndex = 8
+      OnExecute = actCopyExecute
+    end
+    object actGit: TAction
+      Caption = 'actGit'
+      ImageIndex = 3
+      OnExecute = actGitExecute
+    end
+    object actEdit: TAction
+      Caption = 'actEdit'
+      ImageIndex = 10
+      OnExecute = actEditExecute
+    end
+    object actDelete: TAction
+      Caption = 'actDelete'
+      ImageIndex = 9
+      OnExecute = actDeleteExecute
+    end
+  end
+  object MainMenu1: TMainMenu
+    Images = ImageList1
+    Left = 176
+    Top = 76
+    object mnDatei: TMenuItem
+      Caption = 'mnDatei'
+      object mnLoadHist: TMenuItem
+        Action = actLoadHist
+      end
+      object Separator1: TMenuItem
+        Caption = '-'
+      end
+      object mnClose: TMenuItem
+        Action = actClose
+      end
+    end
+    object mnTools: TMenuItem
+      Caption = 'mnTools'
+      object mnNew: TMenuItem
+        Action = actNew
+      end
+      object mnAdd: TMenuItem
+        Action = actAdd
+      end
+      object mnEdit: TMenuItem
+        Action = actEdit
+      end
+      object mnDelete: TMenuItem
+        Action = actDelete
+      end
+      object Separator2: TMenuItem
+        Caption = '-'
+      end
+      object mnCopy: TMenuItem
+        Action = actCopy
+      end
+      object mnExecute: TMenuItem
+        Action = actExecute
+      end
+    end
+    object mnHilfe: TMenuItem
+      Caption = 'mnHilfe'
+      object mnManual: TMenuItem
+        Action = actManual
+      end
+      object mnGit: TMenuItem
+        Action = actGit
+      end
+      object mnAbout: TMenuItem
+        Action = actAbout
+      end
     end
   end
 end
