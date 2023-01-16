@@ -1,7 +1,6 @@
 resourcestring                                     {english}
 
 progname='Bistory - Access to bash history';
-version='V0.1';
 
 defaultcat='Undefined';
 capCategory='Category';
@@ -36,6 +35,8 @@ capEdit='Edit';
 hntEdit='Save edited entry.';
 capDelete='Delete';
 hntDelete='Delete selected command.';
+capSaveTitle='Save result to ...';
+capResult='Result';
 defaultcommand='System#sudo apt update && sudo apt upgrade -y#Get latest updates';
 
 errNoData='No data in ';

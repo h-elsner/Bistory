@@ -1,7 +1,6 @@
 resourcestring                                     {deutsch}
 
 progname='Bistory - Hilfe bei Terminal-Befehlen';
-version='V0.1';
 
 defaultcat='Nicht zugeordnet';
 capCategory='Kategorie';
@@ -32,10 +31,13 @@ capDatei='Datei';
 capTools='Tools';
 capCopy='Kopieren';
 hntCopy='Kommando in die Zwischenablage kopieren';
+capCopyAll='In die Zwischenablage kopieren';
 capEdit='Edit';
 hntEdit='Editierte Daten eintragen';
 capDelete='Löschen';
 hntDelete='Ausgewählten Eintrag löschen.';
+capSaveTitle='Ergebnis speichern nach ...';
+capResult='Ergebnis';
 defaultcommand='System#sudo apt update && sudo apt upgrade -y#Letzte Updates einbringen';
 
 errNoData='Keine Daten in ';

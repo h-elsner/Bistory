@@ -53,7 +53,8 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, Buttons, StdCtrls,
-  ComCtrls, ActnList, Menus, Grids, lclintf, Process;
+  ComCtrls, ActnList, Menus, Grids, lclintf, XMLPropStorage, Process, Types,
+  FileUtil;
 
 type
   TBistory = record
@@ -77,6 +78,7 @@ type
     actNew: TAction;
     actLoadHist: TAction;
     ActionList: TActionList;
+    actResult: TAction;
     btnAdd: TBitBtn;
     btnCopy: TBitBtn;
     btnNew: TBitBtn;
@@ -94,6 +96,12 @@ type
     lblCategory: TLabel;
     edInfo: TMemo;
     MainMenu1: TMainMenu;
+    edRes: TMemo;
+    mnSaveAll: TMenuItem;
+    mnCopyAll: TMenuItem;
+    mnSave: TMenuItem;
+    pmResult: TPopupMenu;
+    SaveDialog: TSaveDialog;
     Separator2: TMenuItem;
     mnDelete: TMenuItem;
     mnEdit: TMenuItem;
@@ -113,9 +121,11 @@ type
     pcHist: TPageControl;
     StatusBar: TStatusBar;
     gridHist: TStringGrid;
+    tsResult: TTabSheet;
     tsTree: TTabSheet;
     tsHist: TTabSheet;
     tvCommand: TTreeView;
+    XMLPropStorage1: TXMLPropStorage;
     procedure actAboutExecute(Sender: TObject);
     procedure actAddExecute(Sender: TObject);
     procedure actCloseExecute(Sender: TObject);
@@ -127,14 +137,24 @@ type
     procedure actLoadHistExecute(Sender: TObject);
     procedure actManualExecute(Sender: TObject);
     procedure actNewExecute(Sender: TObject);
+    procedure actResultExecute(Sender: TObject);
+    procedure edResMouseWheelDown(Sender: TObject; Shift: TShiftState;
+      MousePos: TPoint; var Handled: Boolean);
+    procedure edResMouseWheelUp(Sender: TObject; Shift: TShiftState;
+      MousePos: TPoint; var Handled: Boolean);
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDblClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure gridHistBeforeSelection(Sender: TObject; aCol, aRow: Integer);
+    procedure tvCommandClick(Sender: TObject);
+    procedure tvCommandMouseWheelDown(Sender: TObject; Shift: TShiftState;
+      MousePos: TPoint; var Handled: Boolean);
+    procedure tvCommandMouseWheelUp(Sender: TObject; Shift: TShiftState;
+      MousePos: TPoint; var Handled: Boolean);
 
   private
-    procedure FillTree;            // Read data and fill treeview
+    procedure FillTree;                                                          // Read data and fill treeview
 
   public
 
@@ -148,19 +168,22 @@ var
 
 const
   tab1=' ';
-  sep='#';               // data separator
+  sep='#';                                                                       // data separator
   myhistfile='.bistory.dat';
+  tmpfile='.bi_temp.txt';
   manualfile='Bistory_Manual.pdf';
   gitlink='https://github.com/h-elsner/Bistory';
   homepage='http://h-elsner.mooo.com';
   meinname='h-elsner';
   bashhistfile='.bash_history';
+  version=' V0.2';
+
 
 implementation
 
 {$R *.lfm}
 
-procedure TForm1.FormCreate(Sender: TObject);          // Initialization
+procedure TForm1.FormCreate(Sender: TObject);                                    // Initialization
 begin
   Caption:=progname+tab1+version;
   gbCommand.Caption:=capCommands;
@@ -177,13 +200,16 @@ begin
   lblInfo.Caption:=capInfo;
   lblInfo.Hint:=hntInfo;
   edInfo.Clear;
+  edRes.Clear;
   edInfo.Hint:=hntInfo;
   Statusbar.Panels[0].Width:=pcHist.Left;
   tsTree.Caption:=capCommands;
   tsHist.Caption:=capLoadHist;
+  tsResult.Caption:=capResult;
   gridHist.Cells[0, 0]:=capCommands;
+  SaveDialog.Title:=capSaveTitle;
 
-  actClose.Caption:=capClose;
+  actClose.Caption:=capClose;                                                     // GUI settings
   actClose.Hint:=hntClose;
   actLoadHist.Caption:=capLoadHist;
   actLoadHist.Hint:=hntLoadHist;
@@ -204,18 +230,21 @@ begin
   actEdit.Hint:=hntEdit;
   actDelete.Caption:=capDelete;
   actDelete.Hint:=hntDelete;
+  actResult.Caption:=capSaveTitle;
 
   mnHilfe.Caption:=capHilfe;
   mnTools.Caption:=capTools;
   mnDatei.Caption:=capDatei;
+  mnCopyAll.Caption:=capCopyAll;
+  pcHist.ActivePage:=tsTree;
 end;
 
-procedure TForm1.FormDblClick(Sender: TObject);             // Copy to clipboard by double click
+procedure TForm1.FormDblClick(Sender: TObject);                                  // Copy to clipboard by double click
 begin
   edCommand.CopyToClipboard;
 end;
 
-procedure TForm1.FormResize(Sender: TObject);               // Arrange controls on app window
+procedure TForm1.FormResize(Sender: TObject);                                    // Arrange controls on app window
 begin
   pcHist.Width:=(Form1.Width-pcHist.Left*3) div 2;
   gbCommand.Left:=pcHist.Left+pcHist.Width+pcHist.Left;
@@ -237,13 +266,49 @@ begin
   gridHist.ColWidths[0]:=gridHist.Width;
 end;
 
-procedure TForm1.gridHistBeforeSelection(Sender: TObject; aCol, aRow: Integer);   // Take over a command from bash history
+procedure TForm1.gridHistBeforeSelection(Sender: TObject; aCol, aRow: Integer);  // Take over a command from bash history
 begin
   edCommand.Text:=gridHist.Cells[aCol, aRow].Split([sep])[0];
   edInfo.Text:=trim(gridHist.Cells[aCol, aRow].Split([sep])[1]);
 end;
 
-procedure RemoveDuplicates(var list: TStringList);   // Remove duplicates from string list
+procedure TForm1.tvCommandClick(Sender: TObject);                                // Select one command
+var
+  cnode: TTreeNode;
+
+begin
+  if (tvCommand.Selected<>nil) then begin
+    if (tvCommand.Selected.Level>0) then begin
+      cnode:=tvCommand.Selected;
+      if cnode.Level=1 then begin
+        edInfo.Text:=cnode.GetFirstChild.Text;
+      end;
+      if cnode.Level=2 then begin                                                // Command one level up
+        edInfo.Text:=cnode.Text;
+        cnode:=cnode.Parent;
+      end;
+      cbCategory.Text:=cnode.Parent.Text;
+      edCommand.Text:=cnode.Text;
+    end else
+      cbCategory.Text:=tvCommand.Selected.Text;                                  // Take over only category
+  end;
+end;
+
+procedure TForm1.tvCommandMouseWheelDown(Sender: TObject; Shift: TShiftState;    // Size font down
+  MousePos: TPoint; var Handled: Boolean);
+begin
+  if ssCtrl in Shift then
+    tvCommand.Font.Size:=tvCommand.Font.Size-1;
+end;
+
+procedure TForm1.tvCommandMouseWheelUp(Sender: TObject; Shift: TShiftState;      // Size font up
+  MousePos: TPoint; var Handled: Boolean);
+begin
+  if ssCtrl in Shift then
+    tvCommand.Font.Size:=tvCommand.Font.Size+1;
+end;
+
+procedure RemoveDuplicates(var list: TStringList);                               // Remove duplicates from string list
 var
   sortlist: TStringList;
   i: integer;
@@ -261,7 +326,7 @@ begin
   end;
 end;
 
-function SplitData(const s: string): TBistory;   // Read one line and split
+function SplitData(const s: string): TBistory;                                   // Read one line and split
 begin
   result.cat:=trim(s.Split([sep])[0]);
   if result.cat='' then
@@ -270,7 +335,7 @@ begin
   result.hnt:=s.Split([sep])[2];
 end;
 
-procedure TForm1.FillTree;            // Read data and fill treeview
+procedure TForm1.FillTree;                                                       // Read data and fill treeview
 var
   fn, oldcat: string;
   hlist, catlist: TStringList;
@@ -287,10 +352,10 @@ begin
   oldcat:='';
   try
     fn:=GetUserDir+myhistfile;
-    if not FileExists(fn) then begin      // no data yet - create default
+    if not FileExists(fn) then begin                                             // no data yet - create default
       hlist.Add(defaultcommand);
       hlist.SaveToFile(fn);
-      catlist.Assign(cbCategory.Items);   // Keep default categories
+      catlist.Assign(cbCategory.Items);                                          // Keep default categories
     end;
     hlist.LoadFromFile(fn);
     if hlist.Count>0 then begin
@@ -318,7 +383,7 @@ begin
   end;
 end;
 
-procedure TForm1.actLoadHistExecute(Sender: TObject);   // Load bash history
+procedure TForm1.actLoadHistExecute(Sender: TObject);                            // Load bash history
 var
   inlist: TStringList;
   i: integer;
@@ -336,14 +401,14 @@ begin
         gridHist.Cells[0, i+1]:=inlist[i];
       end;
       pcHist.ActivePage:=tsHist;
-    end
-      else StatusBar.Panels[1].Text:=errNoData+bashhistfile;
+    end else
+      StatusBar.Panels[1].Text:=errNoData+bashhistfile;
   finally
     inlist.Free;
   end;
 end;
 
-procedure TForm1.actManualExecute(Sender: TObject);   // Open Manual
+procedure TForm1.actManualExecute(Sender: TObject);                              // Open Manual
 var
   fn: string;
 
@@ -352,11 +417,11 @@ begin
   if FileExists(fn) then begin
     OpenDocument(fn);
   end else begin
-    OpenURL(gitlink);
+    OpenURL(gitlink);                                                            // GitHub link
   end;
 end;
 
-procedure TForm1.actNewExecute(Sender: TObject);     // New command
+procedure TForm1.actNewExecute(Sender: TObject);                                 // New command
 begin
   cbCategory.Text:='';
   edCommand.Text:='';
@@ -364,22 +429,42 @@ begin
   cbCategory.SetFocus;
 end;
 
-procedure TForm1.FormActivate(Sender: TObject);       // All to do at start
+procedure TForm1.actResultExecute(Sender: TObject);                              // Save Result of command execution
+begin
+  if SaveDialog.Execute then
+    edRes.Lines.SaveToFile(SaveDialog.FileName);
+end;
+
+procedure TForm1.edResMouseWheelDown(Sender: TObject; Shift: TShiftState;        // Size Font down
+  MousePos: TPoint; var Handled: Boolean);
+begin
+  if ssCtrl in Shift then
+    edRes.Font.Size:=edRes.Font.Size-1;
+end;
+
+procedure TForm1.edResMouseWheelUp(Sender: TObject; Shift: TShiftState;          // Size Font up
+  MousePos: TPoint; var Handled: Boolean);
+begin
+  if ssCtrl in Shift then
+    edRes.Font.Size:=edRes.Font.Size+1;
+end;
+
+procedure TForm1.FormActivate(Sender: TObject);                                  // All to do at start
 begin
   FillTree;
 end;
 
-procedure TForm1.actCloseExecute(Sender: TObject);    // Quit
+procedure TForm1.actCloseExecute(Sender: TObject);                               // Quit
 begin
   Close;
 end;
 
-procedure TForm1.actCopyExecute(Sender: TObject);     // Copy to Clipboard
+procedure TForm1.actCopyExecute(Sender: TObject);                                // Copy to Clipboard
 begin
   edCommand.CopyToClipboard;
 end;
 
-procedure TForm1.actDeleteExecute(Sender: TObject);
+procedure TForm1.actDeleteExecute(Sender: TObject);                              // Delete selected command
 var
   fn: string;
   hlist: TStringList;
@@ -405,7 +490,7 @@ begin
       end;
       if del then begin
         hlist.SaveToFile(fn);
-        FillTree;                                   // Reload TreeView from file
+        FillTree;                                                                // Reload TreeView from file
         StatusBar.Panels[1].Text:=edCommand.Text+sDeleted;
       end;
     finally
@@ -415,7 +500,7 @@ begin
     StatusBar.Panels[1].Text:=errNoCmd;
 end;
 
-procedure TForm1.actEditExecute(Sender: TObject);
+procedure TForm1.actEditExecute(Sender: TObject);                                // Save an edited command
 var
   fn: string;
   hlist: TStringList;
@@ -440,13 +525,13 @@ begin
           break;
         end;
       end;
-      if not ed then begin  // Command could not be found, was edited
+      if not ed then begin                                                       // Command could not be found, was edited
         hlist.Add(cbCategory.Text+sep+edCommand.Text+sep+edInfo.Text);
         StatusBar.Panels[1].Text:=edCommand.Text+sAdded;
       end else
         StatusBar.Panels[1].Text:=edCommand.Text+sEdited;
       hlist.SaveToFile(fn);
-      FillTree;                                   // Reload TreeView from file
+      FillTree;                                                                  // Reload TreeView from file
     finally
       hlist.Free;
     end;
@@ -454,27 +539,44 @@ begin
     StatusBar.Panels[1].Text:=errNoCmd;
 end;
 
-procedure TForm1.actExecuteExecute(Sender: TObject);  // Excecute the selected command
+procedure TForm1.actExecuteExecute(Sender: TObject);                             // Excecute the selected command
 var
   cmd: TProcess;
+  fn: string;
 
 begin
   StatusBar.Panels[1].Text:='';
   if trim(edCommand.Text)<>'' then begin
+    fn:=GetUserDir+tmpfile;
     StatusBar.Panels[1].Text:=edCommand.Text+' ...';
     cmd:=TProcess.Create(nil);
     try
-      cmd.Options:=cmd.Options+[poNewConsole, poWaitOnExit];
-      cmd.Executable:=edCommand.Text;
+      cmd.Options:=cmd.Options+[poWaitOnExit, poNewConsole];                     // poNewConsole vs. poUsePipes ???
+      cmd.Executable:=FindDefaultExecutablePath('sh');                           // Find shell
+      cmd.Parameters.Add('-c');                                                  // Read commands from the command_string
+      cmd.Parameters.Add(edCommand.Text+' 2>&1|tee '+fn);                        // Duplicate stdout and stderr
       cmd.Execute;
+      pcHist.ActivePage:=tsResult;
+ //     edRes.Lines.LoadFromStream(cmd.Output);
+      edRes.Lines.LoadFromFile(fn);                                              // Workaround by temp file
+      edRes.Lines.Insert(0, edCommand.Text);
     finally
-      cmd.Free;
+      cmd.FreeOnRelease;
     end;
   end else
     StatusBar.Panels[1].Text:=errNoCmd;
 end;
 
-procedure TForm1.actGitExecute(Sender: TObject);     // Homepage in GitHub
+(*
+procedure TForm1.actExecuteExecute(Sender: TObject);                             // Excecute the selected command
+var
+  r: integer;
+begin
+  r:=fpsystem(edCommand.Text);
+  StatusBar.Panels[1].Text:='Exit code: '+IntToStr(r);
+end;   *)
+
+procedure TForm1.actGitExecute(Sender: TObject);                                 // Homepage in GitHub
 begin
   OpenURL(gitlink);
 end;
@@ -494,7 +596,7 @@ begin
         hlist.LoadFromFile(fn);
       hlist.Add(cbCategory.Text+sep+edCommand.Text+sep+edInfo.Text);
       hlist.SaveToFile(fn);
-      FillTree;                                      // Reload TreeView from file
+      FillTree;                                                                  // Reload TreeView from file
       StatusBar.Panels[1].Text:=edCommand.Text+sAdded;
     finally
       hlist.Free;
@@ -503,7 +605,7 @@ begin
     StatusBar.Panels[1].Text:=errNoCmd;
 end;
 
-procedure TForm1.actAboutExecute(Sender: TObject);    // About box
+procedure TForm1.actAboutExecute(Sender: TObject);                               // About box
 begin
   if MessageDlg(ProgName+tab1+tab1+Version+sLineBreak+
                 sLineBreak+meinname+sLineBreak+sLineBreak+homepage,
