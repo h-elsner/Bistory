@@ -1,5 +1,6 @@
 # Bistory
-**b**ash h**istory**
+> **b**ash h**istory**
+
 **Collect and categorize LINUX terminal commands that one often forget**
 
 The shell in LINUX is a powerful tool - you can do many things very fast and effectively. But who doesn't know: What was the name of the command? And you start searching ...
