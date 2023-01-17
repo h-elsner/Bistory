@@ -4,7 +4,7 @@ progname='Bistory - Access to bash history';
 
 defaultcat='Undefined';
 capCategory='Category';
-hntCatrgory='Category of the command.;
+hntCategory='Category of the command.';
 capCommand='Command';
 hntCommand='Command to be executed.';
 capCommands='Terminal commands';
@@ -31,6 +31,7 @@ capDatei='File';
 capTools='Tools';
 capCopy='Copy';
 hntCopy='Copy command to clipboard';
+capCopyAll='Copy all to clipboard';
 capEdit='Edit';
 hntEdit='Save edited entry.';
 capDelete='Delete';
