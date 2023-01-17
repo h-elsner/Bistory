@@ -1,13 +1,14 @@
 object Form1: TForm1
-  Left = 1878
-  Height = 524
-  Top = 76
-  Width = 729
+  Left = 1766
+  Height = 527
+  Top = 188
+  Width = 736
   Caption = 'Form1'
-  ClientHeight = 500
-  ClientWidth = 729
+  ClientHeight = 503
+  ClientWidth = 736
   Constraints.MinHeight = 440
   Constraints.MinWidth = 640
+  KeyPreview = True
   Menu = MainMenu1
   OnActivate = FormActivate
   OnCreate = FormCreate
@@ -20,7 +21,7 @@ object Form1: TForm1
   object btnReadHist: TBitBtn
     Left = 408
     Height = 40
-    Top = 432
+    Top = 435
     Width = 128
     Action = actLoadHist
     Anchors = [akLeft, akBottom]
@@ -29,9 +30,9 @@ object Form1: TForm1
     TabOrder = 1
   end
   object btnClose: TBitBtn
-    Left = 569
+    Left = 576
     Height = 40
-    Top = 432
+    Top = 435
     Width = 128
     Action = actClose
     Anchors = [akRight, akBottom]
@@ -42,8 +43,8 @@ object Form1: TForm1
   object StatusBar: TStatusBar
     Left = 0
     Height = 17
-    Top = 483
-    Width = 729
+    Top = 486
+    Width = 736
     Panels = <    
       item
         Width = 50
@@ -54,13 +55,13 @@ object Form1: TForm1
     SimplePanel = False
   end
   object gbCommand: TGroupBox
-    Left = 388
-    Height = 408
+    Left = 395
+    Height = 411
     Top = 16
     Width = 324
-    Anchors = [akTop, akLeft, akRight, akBottom]
+    Anchors = [akTop, akRight, akBottom]
     Caption = 'gbCommand'
-    ClientHeight = 391
+    ClientHeight = 394
     ClientWidth = 322
     TabOrder = 0
     object cbCategory: TComboBox
@@ -70,11 +71,6 @@ object Form1: TForm1
       Width = 292
       Anchors = [akTop, akLeft, akRight]
       ItemHeight = 0
-      Items.Strings = (
-        'System'
-        'Info'
-        'Tools'
-      )
       TabOrder = 0
       Text = 'cbCategory'
     end
@@ -94,7 +90,7 @@ object Form1: TForm1
     end
     object edInfo: TMemo
       Left = 16
-      Height = 117
+      Height = 120
       Top = 160
       Width = 292
       Anchors = [akTop, akLeft, akRight, akBottom]
@@ -113,7 +109,7 @@ object Form1: TForm1
     object btnExecute: TBitBtn
       Left = 216
       Height = 40
-      Top = 340
+      Top = 343
       Width = 92
       Action = actExecute
       Anchors = [akRight, akBottom]
@@ -127,13 +123,15 @@ object Form1: TForm1
       Top = 96
       Width = 292
       Anchors = [akTop, akLeft, akRight]
+      OnDblClick = actCopyExecute
+      OnKeyPress = edCommandKeyPress
       TabOrder = 1
       Text = 'edCommand'
     end
     object btnNew: TBitBtn
       Left = 16
       Height = 40
-      Top = 292
+      Top = 295
       Width = 75
       Action = actNew
       Anchors = [akLeft, akBottom]
@@ -144,7 +142,7 @@ object Form1: TForm1
     object btnAdd: TBitBtn
       Left = 16
       Height = 40
-      Top = 340
+      Top = 343
       Width = 75
       Action = actAdd
       Anchors = [akLeft, akBottom]
@@ -155,7 +153,7 @@ object Form1: TForm1
     object btnEdit: TBitBtn
       Left = 108
       Height = 40
-      Top = 292
+      Top = 295
       Width = 75
       Action = actEdit
       Anchors = [akLeft, akBottom]
@@ -166,7 +164,7 @@ object Form1: TForm1
     object btnDelete: TBitBtn
       Left = 108
       Height = 40
-      Top = 340
+      Top = 343
       Width = 75
       Action = actDelete
       Anchors = [akLeft, akBottom]
@@ -177,7 +175,7 @@ object Form1: TForm1
     object btnCopy: TBitBtn
       Left = 214
       Height = 40
-      Top = 292
+      Top = 295
       Width = 92
       Action = actCopy
       Anchors = [akRight, akBottom]
@@ -188,43 +186,44 @@ object Form1: TForm1
   end
   object pcHist: TPageControl
     Left = 16
-    Height = 460
+    Height = 463
     Top = 16
-    Width = 356
-    ActivePage = tsResult
-    Anchors = [akTop, akLeft, akBottom]
+    Width = 363
+    ActivePage = tsTree
+    Anchors = [akTop, akLeft, akRight, akBottom]
     Images = ImageList1
-    TabIndex = 2
+    TabIndex = 0
     TabOrder = 4
     Options = [nboKeyboardTabSwitch]
     object tsTree: TTabSheet
       Caption = 'tsTree'
-      ClientHeight = 430
-      ClientWidth = 346
+      ClientHeight = 433
+      ClientWidth = 353
       object tvCommand: TTreeView
         Left = 0
-        Height = 430
+        Height = 433
         Top = 0
-        Width = 346
+        Width = 353
         TabStop = False
         Align = alClient
         Font.Height = -13
         ParentFont = False
         TabOrder = 0
         OnClick = tvCommandClick
+        OnDblClick = tvCommandDblClick
         OnMouseWheelDown = tvCommandMouseWheelDown
         OnMouseWheelUp = tvCommandMouseWheelUp
       end
     end
     object tsHist: TTabSheet
       Caption = 'tsHist'
-      ClientHeight = 430
-      ClientWidth = 346
+      ClientHeight = 433
+      ClientWidth = 353
       object gridHist: TStringGrid
         Left = 0
-        Height = 430
+        Height = 433
         Top = 0
-        Width = 346
+        Width = 353
         Align = alClient
         ColCount = 1
         FixedCols = 0
@@ -238,20 +237,20 @@ object Form1: TForm1
     end
     object tsResult: TTabSheet
       Caption = 'tsResult'
-      ClientHeight = 430
-      ClientWidth = 346
+      ClientHeight = 433
+      ClientWidth = 353
       object edRes: TMemo
         Left = 0
-        Height = 430
+        Height = 433
         Top = 0
-        Width = 346
+        Width = 353
         Align = alClient
         Font.Height = -13
         Font.Name = 'Liberation Mono'
         Lines.Strings = (
           'edRes'
         )
-        OnDblClick = actResultExecute
+        OnDblClick = mnCopyAllClick
         OnMouseWheelDown = edResMouseWheelDown
         OnMouseWheelUp = edResMouseWheelUp
         ParentFont = False
@@ -539,6 +538,7 @@ object Form1: TForm1
     object mnCopyAll: TMenuItem
       Caption = 'mnCopyAll'
       ImageIndex = 12
+      OnClick = mnCopyAllClick
     end
     object mnSaveAll: TMenuItem
       Action = actResult

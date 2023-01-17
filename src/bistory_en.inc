@@ -37,7 +37,7 @@ capDelete='Delete';
 hntDelete='Delete selected command.';
 capSaveTitle='Save result to ...';
 capResult='Result';
-defaultcommand='System#sudo apt update && sudo apt upgrade -y#Get latest updates';
+defaultcommand='Info#ip a#Show my IP address';
 
 errNoData='No data in ';
 errNoCmd='No command entered';

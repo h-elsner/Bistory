@@ -38,7 +38,7 @@ capDelete='Löschen';
 hntDelete='Ausgewählten Eintrag löschen.';
 capSaveTitle='Ergebnis speichern nach ...';
 capResult='Ergebnis';
-defaultcommand='System#sudo apt update && sudo apt upgrade -y#Letzte Updates einbringen';
+defaultcommand='Info#ip a#Die IP-Adresse ermitteln';
 
 errNoData='Keine Daten in ';
 errNoCmd='Kein Kommando eingegeben';

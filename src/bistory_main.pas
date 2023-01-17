@@ -54,7 +54,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, Buttons, StdCtrls,
   ComCtrls, ActnList, Menus, Grids, lclintf, XMLPropStorage, Process, Types,
-  FileUtil;
+  FileUtil, Clipbrd;
 
 type
   TBistory = record
@@ -138,6 +138,7 @@ type
     procedure actManualExecute(Sender: TObject);
     procedure actNewExecute(Sender: TObject);
     procedure actResultExecute(Sender: TObject);
+    procedure edCommandKeyPress(Sender: TObject; var Key: char);
     procedure edResMouseWheelDown(Sender: TObject; Shift: TShiftState;
       MousePos: TPoint; var Handled: Boolean);
     procedure edResMouseWheelUp(Sender: TObject; Shift: TShiftState;
@@ -147,7 +148,9 @@ type
     procedure FormDblClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure gridHistBeforeSelection(Sender: TObject; aCol, aRow: Integer);
+    procedure mnCopyAllClick(Sender: TObject);
     procedure tvCommandClick(Sender: TObject);
+    procedure tvCommandDblClick(Sender: TObject);
     procedure tvCommandMouseWheelDown(Sender: TObject; Shift: TShiftState;
       MousePos: TPoint; var Handled: Boolean);
     procedure tvCommandMouseWheelUp(Sender: TObject; Shift: TShiftState;
@@ -241,28 +244,31 @@ end;
 
 procedure TForm1.FormDblClick(Sender: TObject);                                  // Copy to clipboard by double click
 begin
+  edCommand.SelectAll;
   edCommand.CopyToClipboard;
 end;
 
 procedure TForm1.FormResize(Sender: TObject);                                    // Arrange controls on app window
 begin
-  pcHist.Width:=(Form1.Width-pcHist.Left*3) div 2;
-  gbCommand.Left:=pcHist.Left+pcHist.Width+pcHist.Left;
-  gbCommand.Width:=pcHist.Width;
+  if (gbCommand.Width<500) or (pcHist.Width<500) then begin
+    pcHist.Width:=(Form1.Width-pcHist.Left*3) div 2;
+    gbCommand.Left:=pcHist.Left+pcHist.Width+pcHist.Left;
+    gbCommand.Width:=pcHist.Width;
 
-  btnReadHist.Left:=gbCommand.Left+btnAdd.Left;
+    btnReadHist.Left:=gbCommand.Left+btnAdd.Left;
 
-  btnAdd.Width:=(gbCommand.Width-btnAdd.Left*4) div 3;
-  btnNew.Width:=btnAdd.Width;
-  btnEdit.Width:=btnAdd.Width;
-  btnDelete.Width:=btnAdd.Width;
-  btnCopy.Width:=btnAdd.Width;
-  btnExecute.Width:=btnAdd.Width;
+    btnAdd.Width:=(gbCommand.Width-btnAdd.Left*4) div 3;
+    btnNew.Width:=btnAdd.Width;
+    btnEdit.Width:=btnAdd.Width;
+    btnDelete.Width:=btnAdd.Width;
+    btnCopy.Width:=btnAdd.Width;
+    btnExecute.Width:=btnAdd.Width;
 
-  btnDelete.Left:=btnAdd.Width+btnAdd.Left*2;
-  btnEdit.Left:=btnDelete.Left;
-  btnExecute.Left:=btnAdd.Width*2+btnAdd.Left*3;
-  btnCopy.Left:=btnExecute.Left;
+    btnDelete.Left:=btnAdd.Width+btnAdd.Left*2;
+    btnEdit.Left:=btnDelete.Left;
+    btnExecute.Left:=btnAdd.Width*2+btnAdd.Left*3;
+    btnCopy.Left:=btnExecute.Left;
+  end;
   gridHist.ColWidths[0]:=gridHist.Width;
 end;
 
@@ -270,6 +276,11 @@ procedure TForm1.gridHistBeforeSelection(Sender: TObject; aCol, aRow: Integer); 
 begin
   edCommand.Text:=gridHist.Cells[aCol, aRow].Split([sep])[0];
   edInfo.Text:=trim(gridHist.Cells[aCol, aRow].Split([sep])[1]);
+end;
+
+procedure TForm1.mnCopyAllClick(Sender: TObject);                                // Copy Result to clipboard
+begin
+  ClipBoard.AsText:=edRes.Text;
 end;
 
 procedure TForm1.tvCommandClick(Sender: TObject);                                // Select one command
@@ -281,7 +292,10 @@ begin
     if (tvCommand.Selected.Level>0) then begin
       cnode:=tvCommand.Selected;
       if cnode.Level=1 then begin
-        edInfo.Text:=cnode.GetFirstChild.Text;
+        if cnode.GetFirstChild<>nil then
+          edInfo.Text:=cnode.GetFirstChild.Text
+        else
+          edInfo.Text:='';
       end;
       if cnode.Level=2 then begin                                                // Command one level up
         edInfo.Text:=cnode.Text;
@@ -292,6 +306,11 @@ begin
     end else
       cbCategory.Text:=tvCommand.Selected.Text;                                  // Take over only category
   end;
+end;
+
+procedure TForm1.tvCommandDblClick(Sender: TObject);
+begin
+  tvCommand.FullExpand;
 end;
 
 procedure TForm1.tvCommandMouseWheelDown(Sender: TObject; Shift: TShiftState;    // Size font down
@@ -373,8 +392,10 @@ begin
         if zl.hnt<>'' then
           tvCommand.Items.AddChild(nodecmd, zl.hnt);
       end;
+      catlist.Add('Info');                                                       // Add default categories
+      catlist.Add('System');
+      catlist.Add('Tools');
       cbCategory.Items.Assign(catlist);
-      tvCommand.FullExpand;
     end else
       StatusBar.Panels[1].Text:=errNoData+myhistfile;
   finally
@@ -435,6 +456,14 @@ begin
     edRes.Lines.SaveToFile(SaveDialog.FileName);
 end;
 
+procedure TForm1.edCommandKeyPress(Sender: TObject; var Key: char);              // Command execute when ENTER was pressed
+begin
+  if key=#13 then begin                                                          // Enter key
+    Key:=#0;
+    actExecuteExecute(self);
+  end;
+end;
+
 procedure TForm1.edResMouseWheelDown(Sender: TObject; Shift: TShiftState;        // Size Font down
   MousePos: TPoint; var Handled: Boolean);
 begin
@@ -461,7 +490,7 @@ end;
 
 procedure TForm1.actCopyExecute(Sender: TObject);                                // Copy to Clipboard
 begin
-  edCommand.CopyToClipboard;
+  ClipBoard.AsText:=edCommand.Text;
 end;
 
 procedure TForm1.actDeleteExecute(Sender: TObject);                              // Delete selected command
@@ -542,26 +571,48 @@ end;
 procedure TForm1.actExecuteExecute(Sender: TObject);                             // Excecute the selected command
 var
   cmd: TProcess;
-  fn: string;
+  fn, s: string;
+  outlist: TStringList;
+  i, k, nc: integer;
+  commands: TStringArray;
 
 begin
   StatusBar.Panels[1].Text:='';
+  nc:=0;
   if trim(edCommand.Text)<>'' then begin
-    fn:=GetUserDir+tmpfile;
-    StatusBar.Panels[1].Text:=edCommand.Text+' ...';
+    outlist:=TStringList.Create;
     cmd:=TProcess.Create(nil);
+    Screen.Cursor:=crHourGlass;                                                  // Let the user know that something is going on
     try
+      fn:=GetUserDir+tmpfile;
+      StatusBar.Panels[1].Text:=edCommand.Text+' ...';
+      edRes.Clear;
+      s:=edCommand.Text;
+      commands:=s.Split(['&&']);
+      nc:=high(commands);
+      edRes.Lines.Add(edCommand.Text);
+      edRes.Lines.Add('');
       cmd.Options:=cmd.Options+[poWaitOnExit, poNewConsole];                     // poNewConsole vs. poUsePipes ???
-      cmd.Executable:=FindDefaultExecutablePath('sh');                           // Find shell
-      cmd.Parameters.Add('-c');                                                  // Read commands from the command_string
-      cmd.Parameters.Add(edCommand.Text+' 2>&1|tee '+fn);                        // Duplicate stdout and stderr
-      cmd.Execute;
-      pcHist.ActivePage:=tsResult;
- //     edRes.Lines.LoadFromStream(cmd.Output);
-      edRes.Lines.LoadFromFile(fn);                                              // Workaround by temp file
-      edRes.Lines.Insert(0, edCommand.Text);
+      cmd.Executable:=FindDefaultExecutablePath('bash');                           // Find shell
+      for k:=0 to nc do begin
+        cmd.Parameters.Clear;
+        cmd.Parameters.Add('-c');                                                // Read commands from the command_string
+        s:=trim(commands[k]);
+        cmd.Parameters.Add(s+' 2>&1|tee '+fn);                                   // Duplicate stdout and stderr
+        cmd.Execute;
+   //     outlist.LoadFromStream(cmd.Output);
+        outlist.LoadFromFile(fn);                                                // Workaround by temp file
+        if nc>0 then
+          edRes.Lines.Add('  [ '+s+' ]');
+        for i:=0 to outlist.Count-1 do
+          edRes.Lines.Add(outlist[i]);                                           // Append
+      end;
+      if outlist.Count>0 then
+        pcHist.ActivePage:=tsResult;
     finally
       cmd.FreeOnRelease;
+      outlist.Free;
+      Screen.Cursor:=crDefault;
     end;
   end else
     StatusBar.Panels[1].Text:=errNoCmd;
