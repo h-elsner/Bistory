@@ -13,4 +13,4 @@ You could also use it as a program launcher. that works, but the terminal window
 "Bistory" is not a LINUX shell. Scripts, complex commands or those that require user input are not executed properly or the results are not displayed. The terminal always disappears after the command is finished. In such cases you should copy the command to the terminal. The clipboard is your friend.
 
 
-![Screenshot](/doc/screenshot.png)
+![Screenshot](Doc/screenshot.png)
