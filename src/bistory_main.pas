@@ -303,6 +303,7 @@ begin
       end;
       cbCategory.Text:=cnode.Parent.Text;
       edCommand.Text:=cnode.Text;
+      edCommand.SetFocus;
     end else
       cbCategory.Text:=tvCommand.Selected.Text;                                  // Take over only category
   end;
@@ -389,6 +390,7 @@ begin
           oldcat:=zl.cat;
         end;
         nodecmd:=tvCommand.Items.AddChild(nodecat, zl.cmd);
+        nodecmd.ImageIndex:=13;
         if zl.hnt<>'' then
           tvCommand.Items.AddChild(nodecmd, zl.hnt);
       end;
@@ -396,6 +398,12 @@ begin
       catlist.Add('System');
       catlist.Add('Tools');
       cbCategory.Items.Assign(catlist);
+
+      for i:=0 to tvCommand.Items.Count-1 do begin                               // Expand current used category tree
+        nodecat:=tvCommand.Items[i];
+        if (nodecat.Level=0) and (nodecat.Text=cbCategory.Text) then
+          nodecat.Expand(true);
+      end;
     end else
       StatusBar.Panels[1].Text:=errNoData+myhistfile;
   finally
@@ -447,7 +455,7 @@ begin
   cbCategory.Text:='';
   edCommand.Text:='';
   edInfo.Clear;
-  cbCategory.SetFocus;
+  edCommand.SetFocus;
 end;
 
 procedure TForm1.actResultExecute(Sender: TObject);                              // Save Result of command execution
