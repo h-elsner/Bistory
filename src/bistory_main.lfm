@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 1707
+  Left = 1708
   Height = 527
-  Top = 197
+  Top = 227
   Width = 736
   Caption = 'Form1'
   ClientHeight = 503
@@ -15,7 +15,7 @@ object Form1: TForm1
   OnDblClick = FormDblClick
   OnResize = FormResize
   Position = poDefaultPosOnly
-  SessionProperties = 'Height;SaveDialog1.FileName;Width;WindowState;edRes.Font;tvCommand.Font'
+  SessionProperties = 'edRes.Font;Height;SaveDialog1.FileName;tvCommand.Font;Width;WindowState'
   ShowHint = True
   LCLVersion = '2.2.0.4'
   object btnReadHist: TBitBtn
@@ -94,9 +94,13 @@ object Form1: TForm1
       Top = 160
       Width = 292
       Anchors = [akTop, akLeft, akRight, akBottom]
+      Font.Height = -13
       Lines.Strings = (
         'edInfo'
       )
+      OnMouseWheelDown = edInfoMouseWheelDown
+      OnMouseWheelUp = edInfoMouseWheelUp
+      ParentFont = False
       TabOrder = 2
     end
     object lblInfo: TLabel

@@ -139,6 +139,10 @@ type
     procedure actNewExecute(Sender: TObject);
     procedure actResultExecute(Sender: TObject);
     procedure edCommandKeyPress(Sender: TObject; var Key: char);
+    procedure edInfoMouseWheelDown(Sender: TObject; Shift: TShiftState;
+      MousePos: TPoint; var Handled: Boolean);
+    procedure edInfoMouseWheelUp(Sender: TObject; Shift: TShiftState;
+      MousePos: TPoint; var Handled: Boolean);
     procedure edResMouseWheelDown(Sender: TObject; Shift: TShiftState;
       MousePos: TPoint; var Handled: Boolean);
     procedure edResMouseWheelUp(Sender: TObject; Shift: TShiftState;
@@ -179,7 +183,7 @@ const
   homepage='http://h-elsner.mooo.com';
   meinname='h-elsner';
   bashhistfile='.bash_history';
-  version=' V0.2';
+  version=' V0.3';
 
 
 implementation
@@ -240,6 +244,7 @@ begin
   mnDatei.Caption:=capDatei;
   mnCopyAll.Caption:=capCopyAll;
   pcHist.ActivePage:=tsTree;
+  tvCommand.Tag:=0;                                                              // Identify if it is collapsed (0) oo full expanded (1)
 end;
 
 procedure TForm1.FormDblClick(Sender: TObject);                                  // Copy to clipboard by double click
@@ -309,9 +314,19 @@ begin
   end;
 end;
 
-procedure TForm1.tvCommandDblClick(Sender: TObject);
+procedure TForm1.tvCommandDblClick(Sender: TObject);                             // Expand vie double click
 begin
-  tvCommand.FullExpand;
+  if (tvCommand.Selected<>nil) and (tvCommand.Selected.Level=0) then begin
+    tvCommand.Selected.Expand(true);
+  end else begin
+    if tvCommand.Tag=0 then begin
+      tvCommand.FullExpand;
+      tvCommand.Tag:=1;
+    end else begin
+      tvCommand.FullCollapse;
+      tvCommand.Tag:=0;
+    end;
+  end;
 end;
 
 procedure TForm1.tvCommandMouseWheelDown(Sender: TObject; Shift: TShiftState;    // Size font down
@@ -370,6 +385,7 @@ begin
   catlist.Sorted:=true;
   catlist.Duplicates:=dupIgnore;
   oldcat:='';
+  tvCommand.BeginUpdate;
   try
     fn:=GetUserDir+myhistfile;
     if not FileExists(fn) then begin                                             // no data yet - create default
@@ -407,6 +423,7 @@ begin
     end else
       StatusBar.Panels[1].Text:=errNoData+myhistfile;
   finally
+    tvCommand.EndUpdate;
     HList.Free;
     catlist.Free;
   end;
@@ -470,6 +487,20 @@ begin
     Key:=#0;
     actExecuteExecute(self);
   end;
+end;
+
+procedure TForm1.edInfoMouseWheelDown(Sender: TObject; Shift: TShiftState;       // Size Font down
+  MousePos: TPoint; var Handled: Boolean);
+begin
+  if ssCtrl in Shift then
+    edInfo.Font.Size:=edInfo.Font.Size-1;
+end;
+
+procedure TForm1.edInfoMouseWheelUp(Sender: TObject; Shift: TShiftState;         // Size Font up
+  MousePos: TPoint; var Handled: Boolean);
+begin
+  if ssCtrl in Shift then
+    edInfo.Font.Size:=edInfo.Font.Size+1;
 end;
 
 procedure TForm1.edResMouseWheelDown(Sender: TObject; Shift: TShiftState;        // Size Font down
